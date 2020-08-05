@@ -1,11 +1,26 @@
 <template>
-  <form @submit.prevent="onsubmit" action="POST">
+  <form @submit.prevent="onsubmit" action="/dash" method="post">
     <p>О вас</p>
-    <input id="lastName" placeholder="Фамилия*" required>
-    <input id="firstName" placeholder="Имя*" required>
-    <input id="patronym" placeholder="Отчество">
+    <input 
+      id="lastName" 
+      placeholder="Фамилия*" 
+      v-model="lastName"
+      name="lastName"
+      required
+    >
+    <input 
+      id="firstName"
+      name="firstName"
+      placeholder="Имя*" 
+      v-model="firstName"
+      required
+    >
+    <div v-if="errors.length">
+      <div v-for="(error, index) in errors" v-bind:key="index">{{ error }}</div>
+    </div>
+    <input id="patronym" name="patronym" v-model="patronym" placeholder="Отчество">
     <label for="birthdate">Дата рождения:</label>
-    <input id="birthdate" type="date" name="birthdate" required>
+    <input id="birthdate" type="date" name="birthdate" v-model="birthdate" required>
     <p>Пол:</p>
     <input name="sex" type="radio" id="male"><label for="male">Мужчина</label> 
     <input name="sex" type="radio" id="female"><label for="female">Женщина</label> 
@@ -14,41 +29,60 @@
       type="tel" 
       name="phoneNumber" 
       id="phoneNumber" 
-      pattern="/+7[0-9]{3}-[0-9]{3}-[0-9]{2}-[0-9]{2}/" 
+      
+      v-model="phoneNumber"
       required
     >
     <p>Группа клиентов</p>
-    <select multiple size="1" name="" id="clientGroup" required>
+    <select 
+      multiple 
+      name="clientGroup" 
+      v-model="clientGroup" 
+      id="clientGroup" 
+      required
+    >
       <option>VIP</option>
       <option>Проблемные</option>
       <option>ОМС</option>
     </select>
-    <select size="1">
+    <label for="doctor">Врач</label>
+    <select size="1" id="doctor" v-model="doctor" name="doctor">
       <option>Иванов</option>
       <option>Захаров</option>
       <option>Чернышева</option>
     </select>
-    <input type="checkbox" name="sms" id="sms"><label for="sms">Не отправлять СМС</label>
+    <input type="checkbox" name="sms" v-model="sms" id="sms"><label for="sms">Не отправлять СМС</label>
 
     <p>Адрес</p>
-    <input placeholder="Индекс">
-    <input placeholder="Страна">
-    <input placeholder="Область">
-    <input placeholder="Город*" id="city" required>
-    <input placeholder="Улица">
-    <input placeholder="Дом">
+    <input placeholder="Индекс" v-model="index" id="index" name="index">
+    <input placeholder="Страна" v-model="country" id="country" name="country">
+    <input placeholder="Область" v-model="region" id="region" name="region">
+    <input placeholder="Город*" v-model="city" id="city" name="city" required>
+    <input placeholder="Улица" v-model="street" id="street" name="street">
+    <input placeholder="Дом" v-model="house" id="house" name="house">
 
     <p>Тип документа*</p>
-    <select name="" id="documentType" value="" required>  
+    <select name="documentType" v-model="documentType" id="documentType" required>  
       <option>Паспорт</option>
       <option>Свидетельство о рождении</option>
       <option>Вод. удостоверение</option>
     </select>
-    <input placeholder="Серия">
-    <input placeholder="Номер">
-    <input placeholder="Кем выдан">
-    <input placeholder="Дата выдачи*" id="dateOfGiving" required>
 
+     <div>
+      <input placeholder="Серия и номер" name="passportData" id="passportData" v-model="passportData">
+      <span v-if="$v.passportData.$invalid">
+        Серия и номер паспорта должны быть в формате 1234 567890
+      </span>
+    </div>
+
+    <input placeholder="Кем выдан">
+
+    <div>
+    <input placeholder="Дата выдачи" v-model="passportDate" @blur="$v.passportDate.$touch()">
+    <span v-if="$v.passportDate.$error">
+      Дата должна быть в формате ДД.ММ.ГГГГ
+    </span>
+    </div> <!---->
     <p>*Поле обязательное для заполнения.</p> 
 
     <button type="submit">Отправить</button>
@@ -56,29 +90,103 @@
 </template>
 
 <script>
+import { required } from "vuelidate/lib/validators";
 export default {
+  
   name: "form",
-  data: () => ({
-    dateOfGiving,
-    documentType,
-    city,
-    clientGroup,
-    birthdate,
-    phoneNumber,
-    firstName,
-    lastName
-  }),
-  validations: {
 
+  data: () => ({
+    firstName: "",
+    lastName: "",
+    patronym: "",
+    birthdate: "",
+    phoneNumber: "",
+    clientGroup: [],
+    doctor: "",
+    sms: "",
+    index: "",
+    country: "",
+    region: "",
+    city: "",
+    street: "",
+    house: "",
+    documentType: "",
+    passportData: "",
+    passportDate: "",
+    dateOfGiving: "",
+    
+    errors: [],
+  }),
+
+  validations: {
+    firstName: {required},
+    lastName: {required},
+    patronym: {},
+    birthdate: {required},
+    phoneNumber: {required},
+    clientGroup: {required},
+    doctor: {},
+    sms: {},
+    index: {},
+    country: {},
+    region: {},
+    city: {required},
+    street: {},
+    house: {},
+    documentType: {required},
+    passportData: {},
+    passportDate: {},
+    dateOfGiving: {},
+  
+    
   },
+ 
   methods: {
     onsubmit() {
+      this.$router.push("/dash")
+
+      if (this.$v.$invalid) {
+        this.$v.$touch
+        return
+      }
+
+      this.errors = [];
+
+      if (!this.firstName) {
+        this.errors.push('Требуется указать имя.');
+      }
+
+      if (!this.lastName) {
+        this.errors.push('Требуется указать возраст.');
+      }
+
+      let formData = {
+        firstName: this.firstName,
+        lastName: this.lastName,
+        patronym: this.patronym,
+        birthdate: this.birthdate,
+        phoneNumber: this.phoneNumber,
+        doctor: this.doctor ,
+        sms: this.sms,
+        index: this.index,
+        country: this.country,
+        region: this.region,
+        city: this.city,
+        street: this.street,
+        house: this.house,
+        documentType: this.documentType,
+        passportData: this.passportData,
+        passportDate: this.passportDate,
+        dateOfGiving: this.dateOfGiving,
+      }
+      console.log(formData)
 
     }
   }
 }
 </script>
 
-<style>
+<style scoped>
+
 
 </style>

@@ -6,11 +6,13 @@
 
 <script>
 import Form from "@/views/form"
+import Dash from "@/views/dash"
 
 export default {
   name: "app",
   components: {
-    Form
+    Form,
+    Dash
   }
 }
 </script>
