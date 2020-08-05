@@ -4,7 +4,7 @@ import Form from '../views/form.vue'
 import Dash from '../views/dash.vue'
 
 Vue.use(VueRouter)
-
+  
   const routes = [
   {
     path: '/',
@@ -15,12 +15,13 @@ Vue.use(VueRouter)
   {
     path: '/dash',
     name: 'dash',
-    component: Dash
+    component: () => import("../views/dash.vue")
   }
 
 ]
 
 const router = new VueRouter({
+  mode: "history",
   routes
 })
 
